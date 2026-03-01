@@ -8,7 +8,8 @@ use super::super::divide_face;
 use super::super::faces_classification::FacesClassification;
 use super::super::integrate::{ShapeOpsCurve, ShapeOpsSurface};
 use super::super::loops_store::{self, BoundaryWire, LoopsStore, LoopsStoreQuadruple, ShapesOpStatus};
-use super::surface_surface_intersection::{parametric_intersection_curves, SSIConfig};
+use super::surface_surface_intersection::SSIConfig;
+use super::intersect_surfaces;
 
 use rustc_hash::FxHashMap as HashMap;
 use truck_base::cgmath64::*;
@@ -79,6 +80,7 @@ where
         + From<IntersectionCurve<PolylineCurve, S, S>>,
     S: ParametricSurface3D
         + SearchNearestParameter<D2, Point = Point3>
+        + SearchParameter<D2, Point = Point3>
         + Clone,
 {
     let mut geom_loops_store0: LoopsStore<_, _> = geom_shell0.face_iter().collect();
@@ -101,8 +103,9 @@ where
             let bounds0 = estimate_surface_bounds(&geom_shell0[face_index0]);
             let bounds1 = estimate_surface_bounds(&geom_shell1[face_index1]);
 
-            // PARAMETRIC SSI instead of mesh-based
-            let curves = parametric_intersection_curves(
+            // PARAMETRIC SSI: dispatches to analytic (plane-plane),
+            // signed-distance (plane-curved), or Newton (curved-curved)
+            let curves = intersect_surfaces(
                 surface0.clone(),
                 bounds0,
                 surface1.clone(),
@@ -208,7 +211,7 @@ where
 }
 
 /// Process one pair of shells using parametric SSI.
-fn process_one_pair_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface>(
+fn process_one_pair_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface + SearchParameter<D2, Point = Point3>>(
     shell0: &Shell<Point3, C, S>,
     shell1: &Shell<Point3, C, S>,
     tol: f64,
@@ -272,7 +275,7 @@ fn process_one_pair_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSu
 }
 
 /// AND operation using parametric SSI.
-pub fn and_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface>(
+pub fn and_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface + SearchParameter<D2, Point = Point3>>(
     solid0: &Solid<Point3, C, S>,
     solid1: &Solid<Point3, C, S>,
     tol: f64,
@@ -294,7 +297,7 @@ pub fn and_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface>(
 }
 
 /// OR operation using parametric SSI.
-pub fn or_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface>(
+pub fn or_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface + SearchParameter<D2, Point = Point3>>(
     solid0: &Solid<Point3, C, S>,
     solid1: &Solid<Point3, C, S>,
     tol: f64,
@@ -316,7 +319,7 @@ pub fn or_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface>(
 }
 
 /// SUBTRACT operation using parametric SSI: solid0 - solid1.
-pub fn subtract_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface>(
+pub fn subtract_parametric<C: ShapeOpsCurve<S> + BoundedCurve, S: ShapeOpsSurface + SearchParameter<D2, Point = Point3>>(
     solid0: &Solid<Point3, C, S>,
     solid1: &Solid<Point3, C, S>,
     tol: f64,
