@@ -16,6 +16,8 @@
 mod healing;
 pub use healing::{RobustSplitClosedEdgesAndFaces, SplitClosedEdgesAndFaces};
 mod transversal;
-pub use transversal::{and, or, ShapeOpsCurve, ShapeOpsSurface};
+pub use transversal::{and, or, subtract, ShapeOpsCurve, ShapeOpsSurface};
+/// Parametric-domain exact surface-surface intersection and face splitting.
+pub use transversal::parametric;
 mod alternative;
 mod fillet;

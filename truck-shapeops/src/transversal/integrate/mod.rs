@@ -177,5 +177,18 @@ pub fn or<C: ShapeOpsCurve<S>, S: ShapeOpsSurface>(
     Some(Solid::new(boundaries))
 }
 
+/// SUBTRACT (difference) operation: solid0 - solid1.
+///
+/// Equivalent to `and(solid0, ¬solid1)`. Inverts solid1 and computes intersection.
+pub fn subtract<C: ShapeOpsCurve<S>, S: ShapeOpsSurface>(
+    solid0: &Solid<Point3, C, S>,
+    solid1: &Solid<Point3, C, S>,
+    tol: f64,
+) -> Option<Solid<Point3, C, S>> {
+    let mut neg = solid1.clone();
+    neg.not();
+    and(solid0, &neg, tol)
+}
+
 #[cfg(test)]
 mod tests;
