@@ -6,9 +6,11 @@
 pub mod surface_surface_intersection;
 pub mod edge_face_intersection;
 pub mod face_splitter;
+pub mod integrate_parametric;
 
 pub use surface_surface_intersection::{
     parametric_intersection_curves, LinkedIntersectionPoint, SSIConfig,
 };
 pub use edge_face_intersection::{edge_face_intersections, EdgeFaceIntersection};
 pub use face_splitter::{split_face_by_curves, signed_area, point_in_polygon};
+pub use integrate_parametric::{and_parametric, or_parametric, subtract_parametric};

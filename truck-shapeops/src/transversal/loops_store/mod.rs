@@ -17,7 +17,7 @@ pub enum ShapesOpStatus {
 }
 
 impl ShapesOpStatus {
-    fn not(self) -> Self {
+    pub(crate) fn not(self) -> Self {
         match self {
             Self::Unknown => Self::Unknown,
             Self::And => Self::Or,
@@ -52,7 +52,7 @@ impl<P, C> BoundaryWire<P, C> {
 }
 
 impl ShapesOpStatus {
-    fn from_is_curve<C, S0, S1>(curve: &IntersectionCurve<C, S0, S1>) -> Option<ShapesOpStatus>
+    pub(crate) fn from_is_curve<C, S0, S1>(curve: &IntersectionCurve<C, S0, S1>) -> Option<ShapesOpStatus>
     where
         C: ParametricCurve3D + BoundedCurve,
         S0: ParametricSurface3D + SearchNearestParameter<D2, Point = Point3>,
@@ -138,7 +138,7 @@ impl<'a, P, C> IntoIterator for &'a LoopsStore<P, C> {
 }
 
 #[derive(Clone, Debug, Copy, PartialEq)]
-enum ParameterKind {
+pub(crate) enum ParameterKind {
     Front,
     Back,
     Inner(f64),
@@ -219,12 +219,12 @@ impl<P: Copy, C: Clone> Loops<P, C> {
     }
 
     #[inline(always)]
-    fn add_independent_loop(&mut self, r#loop: BoundaryWire<P, C>) {
+    pub(crate) fn add_independent_loop(&mut self, r#loop: BoundaryWire<P, C>) {
         self.push(r#loop.inverse());
         self.push(r#loop);
     }
 
-    fn add_edge(
+    pub(crate) fn add_edge(
         &mut self,
         edge0: Edge<P, C>,
         status: ShapesOpStatus,
@@ -302,7 +302,7 @@ impl<P: Copy + Tolerance, C: Clone> LoopsStore<P, C> {
             .for_each(|loops| loops.swap_edge_into_wire(edge_id, new_wire))
     }
 
-    fn add_polygon_vertex(
+    pub(crate) fn add_polygon_vertex(
         &mut self,
         loops_index: usize,
         v: &Vertex<P>,
@@ -339,7 +339,7 @@ impl<P: Copy + Tolerance, C: Clone> LoopsStore<P, C> {
 }
 
 impl<C> LoopsStore<Point3, C> {
-    fn add_geom_vertex<S>(
+    pub(crate) fn add_geom_vertex<S>(
         &mut self,
         (loops_index, wire_index, edge_index): (usize, usize, usize),
         v: &Vertex<Point3>,
